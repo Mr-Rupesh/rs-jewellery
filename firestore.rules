@@ -1,0 +1,72 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isAdmin() { return request.auth != null && request.auth.token.admin == true; }
+    function isOwner(uid) { return request.auth != null && request.auth.uid == uid; }
+
+    // Public catalogue + gold rates + store settings (read-only for clients)
+    match /products/{id}  { allow read: if resource.data.active == true || isAdmin(); allow write: if isAdmin(); }
+    match /settings/{id}  { allow read: if true; allow write: if isAdmin(); }
+    match /settings/pricing/rateHistory/{id} { allow read, write: if isAdmin(); }
+
+    // Orders are created and updated ONLY by the server (Admin SDK bypasses rules).
+    match /orders/{id} {
+      allow read: if isOwner(resource.data.uid) || isAdmin();
+      allow create, delete: if false;
+      allow update: if isAdmin()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','tracking','carrier','updatedAt']);
+    }
+
+    match /custom_inquiries/{id} {
+      allow create: if request.auth != null
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.status == 'NEW'
+        && request.resource.data.description is string
+        && request.resource.data.description.size() <= 2000;
+      allow read: if isOwner(resource.data.uid) || isAdmin();
+      allow update: if isAdmin();
+      allow delete: if false;
+    }
+
+    // Login codes: server only (hashed, short-lived). No client may read or write them.
+    match /email_otps/{id} { allow read, write: if false; }
+
+    // Profile + wishlist
+    match /users/{uid} { allow read, write: if isOwner(uid); allow read: if isAdmin(); }
+
+    // One return/exchange request per order (document id = order id), only for your own DELIVERED order.
+    match /returns/{id} {
+      allow create: if request.auth != null
+        && id == request.resource.data.orderId
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.status == 'REQUESTED'
+        && request.resource.data.type in ['RETURN', 'EXCHANGE']
+        && request.resource.data.reason is string
+        && request.resource.data.reason.size() >= 10 && request.resource.data.reason.size() <= 1000
+        && get(/databases/$(database)/documents/orders/$(id)).data.uid == request.auth.uid
+        && get(/databases/$(database)/documents/orders/$(id)).data.status == 'DELIVERED';
+      allow read: if isOwner(resource.data.uid) || isAdmin();
+      allow update: if isAdmin()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','adminNote','updatedAt']);
+      allow delete: if false;
+    }
+
+    // Support chat: one thread per customer (thread id = customer uid)
+    match /support_threads/{uid} {
+      allow read: if isOwner(uid) || isAdmin();
+      allow create: if isOwner(uid) && request.resource.data.uid == uid && request.resource.data.status == 'OPEN';
+      allow update: if isAdmin()
+        || (isOwner(uid) && request.resource.data.status == 'OPEN'
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name','status','lastMessageAt','lastMessageText','unreadAdmin']));
+      allow delete: if false;
+
+      match /messages/{mid} {
+        allow read: if isOwner(uid) || isAdmin();
+        allow create: if ((isOwner(uid) && request.resource.data.from == 'customer') || (isAdmin() && request.resource.data.from == 'admin'))
+          && request.resource.data.text is string
+          && request.resource.data.text.size() > 0 && request.resource.data.text.size() <= 1000;
+        allow update, delete: if false;
+      }
+    }
+  }
+}

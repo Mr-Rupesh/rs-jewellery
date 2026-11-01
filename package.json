@@ -1,0 +1,44 @@
+{
+  "name": "rs-jewellers",
+  "version": "0.1.0",
+  "private": true,
+  "engines": {
+    "node": ">=22.6"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "emulators": "firebase emulators:start",
+    "test": "node --experimental-strip-types --test src/lib/*.test.ts",
+    "typecheck": "tsc --noEmit",
+    "emulators:persist": "firebase emulators:start --import=./.emulator-data --export-on-exit",
+    "seed": "node --experimental-strip-types scripts/seed.ts",
+    "webhook:test": "node --env-file=.env.local --experimental-strip-types scripts/fake-webhook.ts",
+    "set-admin": "node --env-file=.env.local --experimental-strip-types scripts/set-admin.ts",
+    "test:rules": "firebase emulators:exec --only firestore --project demo-rs-rules \"node --test tests/rules.test.mjs\"",
+    "check:deploy": "node --experimental-strip-types scripts/check-deploy.ts"
+  },
+  "dependencies": {
+    "firebase": "^11.0.0",
+    "firebase-admin": "^13.0.0",
+    "lucide-react": "^0.460.0",
+    "next": "^15.0.0",
+    "razorpay": "^2.9.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "autoprefixer": "^10.4.0",
+    "firebase-tools": "^13.0.0",
+    "postcss": "^8.5.10",
+    "tailwindcss": "^3.4.0",
+    "typescript": "^5.6.0",
+    "@firebase/rules-unit-testing": "^4.0.1"
+  },
+  "overrides": {
+    "postcss": "$postcss",
+    "@grpc/grpc-js": "^1.13.6"
+  }
+}

@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html { scroll-behavior: smooth; }
+  body { @apply bg-stone font-body text-ink antialiased; overflow-x: clip; }
+  h1, h2, h3 { @apply font-display; }
+  :focus-visible { outline: 2px solid #8A6420; outline-offset: 2px; }
+  ::selection { background: #C9A24A; color: #17120E; }
+}
+@layer components {
+  .btn { @apply inline-flex items-center justify-center rounded-sm px-5 py-2.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50; }
+  .btn-primary { @apply btn bg-gold text-ink shadow-sm hover:bg-[#b88f38]; }
+  .btn-quiet { @apply btn border border-line bg-white text-ink hover:border-gold; }
+  .field { @apply w-full rounded-sm border border-line bg-white px-3 py-2 text-sm placeholder:text-muted/60; }
+  .label { @apply mb-1 block text-sm text-muted; }
+  .eyebrow { @apply text-xs font-medium uppercase tracking-[0.28em] text-golddeep; }
+  .gold-rule { @apply mt-3 h-px w-16 bg-gold; }
+  .full-bleed { width: 100vw; margin-left: calc(50% - 50vw); }
+  .card-lift { transition: transform 0.25s ease, box-shadow 0.25s ease; }
+  .card-lift:hover { transform: translateY(-3px); box-shadow: 0 14px 28px -14px rgba(23, 18, 14, 0.35); }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; scroll-behavior: auto !important; }
+  .card-lift:hover { transform: none; }
+}

@@ -1,0 +1,104 @@
+# Firebase App Hosting configuration for the live site.
+# Before every deploy run:  npm run check:deploy
+# Replace every REPLACE_WITH_... value. Secrets are NOT written here: they live in Google Secret Manager (see DEPLOYMENT.md).
+
+runConfig:
+  cpu: 1
+  memoryMiB: 512
+  minInstances: 0 # 0 = no cost while idle, but the first visit after a quiet spell is slower. Use 1 to keep one copy warm (costs more).
+  maxInstances: 3 # caps the cost. The rate limiter works per copy of the server, so keep this small.
+  concurrency: 80
+
+env:
+  # ---- Switches (must stay as they are in production) ----
+  - variable: NEXT_PUBLIC_USE_EMULATORS
+    value: "false"
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: NEXT_PUBLIC_ENABLE_PHONE_LOGIN
+    value: "false"
+    availability:
+      - BUILD
+      - RUNTIME
+
+  # ---- Firebase web app settings: Firebase console > Project settings > Your apps > Web app > Config (these are public values) ----
+  - variable: NEXT_PUBLIC_FIREBASE_API_KEY
+    value: AIzaSyBEDYwiCCZ96H38ipgotVrKsaxZOrWveLo
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+    value: rs-jewellers-efcfe.firebaseapp.com
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: NEXT_PUBLIC_FIREBASE_PROJECT_ID
+    value: rs-jewellers-efcfe
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
+    value: https://console.firebase.google.com/u/2/project/rs-jewellers-efcfe/storage/rs-jewellers-efcfe.firebasestorage.app/file
+    availability:
+      - BUILD
+      - RUNTIME
+
+  # ---- Shop details (shown on the site, invoices and policy pages). GSTIN is left out until you have one: empty values are not allowed here. ----
+  - variable: NEXT_PUBLIC_SHOP_NAME
+    value: R S Jewellers
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: NEXT_PUBLIC_SHOP_ADDRESS
+    value: 12/16A, Old Hanuman Gali, 1st Cross Lane, 2nd Floor, Room No. 19,
+      Kalbadevi Road, Mumbai 400002
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: NEXT_PUBLIC_SHOP_STATE
+    value: Maharashtra
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: NEXT_PUBLIC_SHOP_PHONE
+    value: "9967551801"
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: NEXT_PUBLIC_SHOP_EMAIL
+    value: satheramesh112@gmail.com
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: NEXT_PUBLIC_WHATSAPP_NUMBER
+    value: "919322392769" # confirm this is the shop's WhatsApp number
+    availability:
+      - BUILD
+      - RUNTIME
+
+  # ---- Email ----
+  - variable: EMAIL_FROM
+    value: rupeshmalhipparge@gmail.com # e.g. RS Jewellers <login@yourdomain.com>, an address on a domain verified in Resend
+    availability:
+      - RUNTIME
+  - variable: RAZORPAY_KEY_ID
+    secret: razorpay-key-id
+  - variable: RAZORPAY_KEY_SECRET
+    secret: razorpay-key-secret
+    availability:
+      - RUNTIME
+  - variable: RAZORPAY_WEBHOOK_SECRET
+    secret: razorpay-webhook-secret
+    availability:
+      - RUNTIME
+  - variable: OTP_SECRET
+    secret: otp-secret
+    availability:
+      - RUNTIME
+  - variable: RESEND_API_KEY
+    secret: resend-api-key
+    availability:
+      - RUNTIME
+  - variable: ADMIN_EMAILS
+    secret: admin-emails
